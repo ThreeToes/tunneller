@@ -13,7 +13,7 @@ Run `make build`, a binary will be produced
 in the `build` folder
 
 ## Todos
-* Make region configurable
+* ~~Make region configurable~~
 * Make local port configurable
 * Make remote port configurable
 * Add flags to skip steps
