@@ -1,0 +1,67 @@
+# github.com/aws/aws-sdk-go v1.30.21
+github.com/aws/aws-sdk-go/aws
+github.com/aws/aws-sdk-go/aws/awserr
+github.com/aws/aws-sdk-go/aws/awsutil
+github.com/aws/aws-sdk-go/aws/client
+github.com/aws/aws-sdk-go/aws/client/metadata
+github.com/aws/aws-sdk-go/aws/corehandlers
+github.com/aws/aws-sdk-go/aws/credentials
+github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
+github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
+github.com/aws/aws-sdk-go/aws/credentials/processcreds
+github.com/aws/aws-sdk-go/aws/credentials/stscreds
+github.com/aws/aws-sdk-go/aws/csm
+github.com/aws/aws-sdk-go/aws/defaults
+github.com/aws/aws-sdk-go/aws/ec2metadata
+github.com/aws/aws-sdk-go/aws/endpoints
+github.com/aws/aws-sdk-go/aws/request
+github.com/aws/aws-sdk-go/aws/session
+github.com/aws/aws-sdk-go/aws/signer/v4
+github.com/aws/aws-sdk-go/internal/context
+github.com/aws/aws-sdk-go/internal/ini
+github.com/aws/aws-sdk-go/internal/sdkio
+github.com/aws/aws-sdk-go/internal/sdkmath
+github.com/aws/aws-sdk-go/internal/sdkrand
+github.com/aws/aws-sdk-go/internal/sdkuri
+github.com/aws/aws-sdk-go/internal/shareddefaults
+github.com/aws/aws-sdk-go/internal/strings
+github.com/aws/aws-sdk-go/internal/sync/singleflight
+github.com/aws/aws-sdk-go/private/protocol
+github.com/aws/aws-sdk-go/private/protocol/ec2query
+github.com/aws/aws-sdk-go/private/protocol/json/jsonutil
+github.com/aws/aws-sdk-go/private/protocol/query
+github.com/aws/aws-sdk-go/private/protocol/query/queryutil
+github.com/aws/aws-sdk-go/private/protocol/rest
+github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
+github.com/aws/aws-sdk-go/service/ec2
+github.com/aws/aws-sdk-go/service/ec2/ec2iface
+github.com/aws/aws-sdk-go/service/rds
+github.com/aws/aws-sdk-go/service/rds/rdsiface
+github.com/aws/aws-sdk-go/service/sts
+github.com/aws/aws-sdk-go/service/sts/stsiface
+# github.com/davecgh/go-spew v1.1.0
+github.com/davecgh/go-spew/spew
+# github.com/gizak/termui/v3 v3.1.0
+github.com/gizak/termui/v3
+github.com/gizak/termui/v3/drawille
+github.com/gizak/termui/v3/widgets
+# github.com/golang/mock v1.4.3
+github.com/golang/mock/gomock
+# github.com/jmespath/go-jmespath v0.3.0
+github.com/jmespath/go-jmespath
+# github.com/mattn/go-runewidth v0.0.2
+github.com/mattn/go-runewidth
+# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
+github.com/mitchellh/go-wordwrap
+# github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d
+github.com/nsf/termbox-go
+# github.com/pkg/errors v0.9.1
+github.com/pkg/errors
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/stretchr/testify v1.5.1
+github.com/stretchr/testify/assert
+# gopkg.in/ini.v1 v1.55.0
+gopkg.in/ini.v1
+# gopkg.in/yaml.v2 v2.2.2
+gopkg.in/yaml.v2
