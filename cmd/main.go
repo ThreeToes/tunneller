@@ -36,19 +36,49 @@ func main() {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
+	defer ui.Close()
 	statusLabel := widgets.NewParagraph()
 	optionsList := widgets.NewList()
+	optionsList.TextStyle = ui.NewStyle(ui.ColorYellow)
 
+	statusLabel.Text = "Choose a region"
 	var options []string
+	options = []string{
+		"us-east-1",
+		"us-east-2",
+		"us-west-1",
+		"us-west-2",
+		"af-south-1",
+		"ap-east-1",
+		"ap-south-1",
+		"ap-northeast-2",
+		"ap-southeast-1",
+		"ap-southeast-2",
+		"ap-northeast-1",
+		"ca-central-1",
+		"eu-central-1",
+		"eu-west-1",
+		"eu-west-2",
+		"eu-south-1",
+		"eu-west-3",
+		"eu-north-1",
+		"me-south-1",
+		"sa-east-1",
+	}
+	optionsList.Rows = options
+	if handleListSelect(statusLabel, optionsList) {
+		return
+	}
+	selectedRegion := options[optionsList.SelectedRow]
+
+	options = nil
 	profileContainers := prof.GetProfiles()
 	for i, p := range profileContainers {
 		options = append(options, fmt.Sprintf("[%d] %s", i, p.GetName()))
 	}
 
 	optionsList.Rows = options
-	optionsList.TextStyle = ui.NewStyle(ui.ColorYellow)
 	statusLabel.Text = "Choose a profile"
-	defer ui.Close()
 	if handleListSelect(statusLabel, optionsList) {
 		return
 	}
@@ -56,10 +86,9 @@ func main() {
 	statusLabel.Text = fmt.Sprintf("Chose profile %s. Connecting", selectedProfile.GetName())
 	ui.Clear()
 	ui.Render(statusLabel)
-	if err = selectedProfile.Connect("ap-southeast-2"); err != nil {
-		statusLabel.Text = fmt.Sprintf("Error connecting profile to ap-southeast-2: %v", err)
+	if err = selectedProfile.Connect(selectedRegion); err != nil {
+		statusLabel.Text = fmt.Sprintf("Error connecting profile to region %s: %v", selectedRegion, err)
 		ui.Render(statusLabel)
-		time.Sleep(3 * time.Second)
 		ui.Close()
 		log.Fatalf(statusLabel.Text)
 	}
