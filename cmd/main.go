@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -70,6 +71,17 @@ func main() {
 		return
 	}
 	selectedRegion := options[optionsList.SelectedRow]
+
+	portString, close := handleKeyboardInput("Enter local port")
+	if close {
+		return
+	}
+	port, err := strconv.Atoi(portString)
+	if err != nil {
+		ui.Clear()
+		ui.Close()
+		log.Fatalf("Could not parse port: %v", err)
+	}
 
 	options = nil
 	profileContainers := prof.GetProfiles()
@@ -203,12 +215,12 @@ func main() {
 	ui.Render(statusLabel)
 	dbEndpoint := internal.NewEndpoint(fmt.Sprintf("ec2-user@%s:%d",
 		*selectedDb.Endpoint.Address, *selectedDb.Endpoint.Port))
-	done, err := internal.Tunnel(8888, dbEndpoint, ec2Endpoint)
+	done, err := internal.Tunnel(port, dbEndpoint, ec2Endpoint)
 	if err != nil {
 		ui.Close()
 		log.Fatalf("Could start local listener: %v", err)
 	}
-	statusLabel.Text = "Tunnel started. Connect on localhost port 8888 with your DB client using regular credentials. Press Ctrl-C to end"
+	statusLabel.Text = fmt.Sprintf("Tunnel started. Connect on localhost port %d with your DB client using regular credentials. Press Ctrl-C to end", port)
 	termWidth, termHeight := ui.TerminalDimensions()
 	statusLabel.SetRect(((termWidth / 2) - 15), ((termHeight / 2) - 15),
 		((termWidth / 2) + 15), ((termHeight / 2) + 15))
@@ -219,6 +231,8 @@ func main() {
 		select {
 		case e := <-evt:
 			if e.ID == "<C-c>" {
+				ui.Clear()
+				ui.Close()
 				log.Println("Thanks, goodbye")
 				return
 			}
@@ -232,6 +246,34 @@ func main() {
 			return
 		}
 	}
+}
+
+func handleKeyboardInput(prompt string) (string, bool) {
+	statusLabel := widgets.NewParagraph()
+	inputBox := widgets.NewParagraph()
+	statusLabel.Text = prompt
+	uiEvents := ui.PollEvents()
+	builder := strings.Builder{}
+	for {
+		termWidth, _ := ui.TerminalDimensions()
+		statusLabel.SetRect(0, 0, termWidth, 4)
+		inputBox.SetRect(0, 3, termWidth, 4)
+		inputBox.Text = builder.String()
+		ui.Clear()
+		ui.Render(statusLabel, inputBox)
+		e := <-uiEvents
+		switch {
+		case e.ID == "<C-c>":
+			return "", true
+		case e.ID == "<Enter>":
+			return builder.String(), false
+		case strings.HasPrefix(e.ID, "<C-"):
+			continue
+		default:
+			builder.WriteString(e.ID)
+		}
+	}
+	return builder.String(), false
 }
 
 func handleListSelect(statusLabel *widgets.Paragraph, optionsList *widgets.List) bool {

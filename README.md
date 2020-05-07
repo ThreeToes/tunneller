@@ -14,7 +14,7 @@ in the `build` folder
 
 ## Todos
 * ~~Make region configurable~~
-* Make local port configurable
+* ~~Make local port configurable~~
 * Make remote port configurable
 * Add flags to skip steps
 * Unit testing
