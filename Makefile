@@ -7,11 +7,13 @@ else
 	EXE_SUFFIX=
 endif
 
+.PHONY: build test vendor
+
 build: test
 	go build -mod=vendor -o $(OUTPUT_PATH)/$(BINARY_NAME)$(EXE_SUFFIX) ./cmd/...
 
 test: vendor
-	go test -mod=vendor cover.out ./internal/...
+	go test -mod=vendor -cover-profile=coverage.out ./internal/...
 
 vendor:
 	go mod tidy

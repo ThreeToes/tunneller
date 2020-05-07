@@ -17,7 +17,7 @@ import (
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
-	"github.com/threetoes/tuneller/internal"
+	"github.com/threetoes/tunneller/internal"
 )
 
 func main() {
