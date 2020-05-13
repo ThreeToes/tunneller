@@ -1,11 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"log"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,13 +14,25 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
-
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	log "github.com/sirupsen/logrus"
 	"github.com/threetoes/tunneller/internal"
 )
 
 func main() {
+	profileF := flag.String("profile", "", "Name of the profile to use")
+	localPortF := flag.Int("local-port", -1, "Port to use")
+	regionF := flag.String("region", "", "AWS Region")
+	helpF := flag.Bool("help", false, "Display help and exit")
+
+	flag.Parse()
+
+	if *helpF {
+		flag.Usage()
+		return
+	}
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		fmt.Println("Cannot find AWS credentials file")
@@ -41,6 +52,9 @@ func main() {
 	statusLabel := widgets.NewParagraph()
 	optionsList := widgets.NewList()
 	optionsList.TextStyle = ui.NewStyle(ui.ColorYellow)
+	ui.Clear()
+	statusLabel.Text = "Loading"
+	ui.Render(statusLabel)
 
 	statusLabel.Text = "Choose a region"
 	var options []string
@@ -66,38 +80,48 @@ func main() {
 		"me-south-1",
 		"sa-east-1",
 	}
-	optionsList.Rows = options
-	if handleListSelect(statusLabel, optionsList) {
-		return
+	var selectedRegion string
+	if *regionF == "" {
+		optionsList.Rows = options
+		if handleListSelect(statusLabel, optionsList) {
+			return
+		}
+		selectedRegion = options[optionsList.SelectedRow]
+	} else {
+		selectedRegion = *regionF
 	}
-	selectedRegion := options[optionsList.SelectedRow]
 
-	portString, close := handleKeyboardInput("Enter local port")
-	if close {
-		return
-	}
-	port, err := strconv.Atoi(portString)
-	if err != nil {
-		ui.Clear()
-		ui.Close()
-		log.Fatalf("Could not parse port: %v", err)
+	var port int
+	if *localPortF == -1 {
+		port = 8888
+	} else {
+		port = *localPortF
 	}
 
 	options = nil
 	profileContainers := prof.GetProfiles()
+	var selectedProfile internal.ProfileContainer
 	for i, p := range profileContainers {
+		if p.GetName() == *profileF {
+			selectedProfile = p
+			break
+		}
 		options = append(options, fmt.Sprintf("[%d] %s", i, p.GetName()))
 	}
 
-	optionsList.Rows = options
-	statusLabel.Text = "Choose a profile"
-	if handleListSelect(statusLabel, optionsList) {
-		return
+	if selectedProfile == nil {
+		optionsList.Rows = options
+		statusLabel.Text = "Choose a profile"
+		if handleListSelect(statusLabel, optionsList) {
+			return
+		}
+		selectedProfile = profileContainers[optionsList.SelectedRow]
+		statusLabel.Text = fmt.Sprintf("Chose profile %s. Connecting", selectedProfile.GetName())
+		ui.Clear()
+		ui.Render(statusLabel)
 	}
-	selectedProfile := profileContainers[optionsList.SelectedRow]
-	statusLabel.Text = fmt.Sprintf("Chose profile %s. Connecting", selectedProfile.GetName())
-	ui.Clear()
-	ui.Render(statusLabel)
+
+
 	if err = selectedProfile.Connect(selectedRegion); err != nil {
 		statusLabel.Text = fmt.Sprintf("Error connecting profile to region %s: %v", selectedRegion, err)
 		ui.Render(statusLabel)
@@ -222,8 +246,8 @@ func main() {
 	}
 	statusLabel.Text = fmt.Sprintf("Tunnel started. Connect on localhost port %d with your DB client using regular credentials. Press Ctrl-C to end", port)
 	termWidth, termHeight := ui.TerminalDimensions()
-	statusLabel.SetRect(((termWidth / 2) - 15), ((termHeight / 2) - 15),
-		((termWidth / 2) + 15), ((termHeight / 2) + 15))
+	statusLabel.SetRect(((termWidth / 2) - 10), ((termHeight / 2) - 5),
+		((termWidth / 2) + 10), ((termHeight / 2) + 5))
 	ui.Clear()
 	ui.Render(statusLabel)
 	evt := ui.PollEvents()
@@ -233,8 +257,10 @@ func main() {
 			if e.ID == "<C-c>" {
 				ui.Clear()
 				ui.Close()
-				log.Println("Thanks, goodbye")
-				return
+				log.Infof("Shutting down listener thread")
+				done <- 1
+				log.Infof("Thanks, goodbye")
+				os.Exit(0)
 			}
 			ui.Clear()
 			termWidth, termHeight = ui.TerminalDimensions()
@@ -242,8 +268,8 @@ func main() {
 				((termWidth / 2) + 15), ((termHeight / 2) + 15))
 			ui.Render(statusLabel)
 		case <-done:
-			log.Println("Tunnel server reports it's done. Exiting")
-			return
+			log.Println("Tunnel server reports it's had an error. Exiting")
+			os.Exit(1)
 		}
 	}
 }

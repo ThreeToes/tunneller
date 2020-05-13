@@ -2,9 +2,9 @@ package internal
 
 import (
 	"fmt"
-
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh/terminal"
+	"time"
 
 	"io"
 	"net"
@@ -13,20 +13,37 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+
 func Tunnel(localPort int, remoteHost EndpointIface, bastionHost EndpointIface) (chan int, error) {
 	doneChannel := make(chan int)
 	go func() {
-		defer func() {
-			doneChannel <- 1
-		}()
-		listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "localhost", localPort))
+		l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", "localhost", localPort))
 		if err != nil {
+			return
+		}
+		listener, ok := l.(*net.TCPListener)
+		if !ok {
+			log.Errorf("Could not cast listener")
 			return
 		}
 		defer listener.Close()
 		for {
-			conn, err := listener.Accept()
+			deadline := time.Now().Add(time.Second)
+			listener.SetDeadline(deadline)
+			select {
+			case _=<-doneChannel:
+				log.Infof("Listener received shutdown signal")
+				return
+			default:
+				// do nothing
+			}
+		    conn, err := listener.Accept()
 			if err != nil {
+				if os.IsTimeout(err) {
+					continue
+				}
+				log.Infof("Encountered unrecoverable error while attempting to accept a connection: %v", err)
+				doneChannel <- 1
 				return
 			}
 			log.Debug("accepted connection")
