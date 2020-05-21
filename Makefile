@@ -9,7 +9,10 @@ endif
 
 .PHONY: build test vendor
 
-build: test
+build: bin
+	zip $(OUTPUT_PATH)/tunneller $(OUTPUT_PATH)/$(BINARY_NAME)$(EXE_SUFFIX)
+
+bin: test
 	go build -mod=vendor -o $(OUTPUT_PATH)/$(BINARY_NAME)$(EXE_SUFFIX) ./cmd/...
 
 test: vendor
