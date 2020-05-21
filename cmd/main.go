@@ -25,6 +25,7 @@ func main() {
 	localPortF := flag.Int("local-port", -1, "Port to use")
 	regionF := flag.String("region", "", "AWS Region")
 	helpF := flag.Bool("help", false, "Display help and exit")
+	ec2UserF := flag.String("os-user", "ec2-user", "OS username for the bastion")
 
 	flag.Parse()
 
@@ -120,7 +121,6 @@ func main() {
 		ui.Clear()
 		ui.Render(statusLabel)
 	}
-
 
 	if err = selectedProfile.Connect(selectedRegion); err != nil {
 		statusLabel.Text = fmt.Sprintf("Error connecting profile to region %s: %v", selectedRegion, err)
@@ -237,8 +237,8 @@ func main() {
 	statusLabel.Text = "Connected to bastion, starting tunnel"
 	ui.Clear()
 	ui.Render(statusLabel)
-	dbEndpoint := internal.NewEndpoint(fmt.Sprintf("ec2-user@%s:%d",
-		*selectedDb.Endpoint.Address, *selectedDb.Endpoint.Port))
+	dbEndpoint := internal.NewEndpoint(fmt.Sprintf("%s@%s:%d",
+		*ec2UserF, *selectedDb.Endpoint.Address, *selectedDb.Endpoint.Port))
 	done, err := internal.Tunnel(port, dbEndpoint, ec2Endpoint)
 	if err != nil {
 		ui.Close()
@@ -272,34 +272,6 @@ func main() {
 			os.Exit(1)
 		}
 	}
-}
-
-func handleKeyboardInput(prompt string) (string, bool) {
-	statusLabel := widgets.NewParagraph()
-	inputBox := widgets.NewParagraph()
-	statusLabel.Text = prompt
-	uiEvents := ui.PollEvents()
-	builder := strings.Builder{}
-	for {
-		termWidth, _ := ui.TerminalDimensions()
-		statusLabel.SetRect(0, 0, termWidth, 4)
-		inputBox.SetRect(0, 3, termWidth, 4)
-		inputBox.Text = builder.String()
-		ui.Clear()
-		ui.Render(statusLabel, inputBox)
-		e := <-uiEvents
-		switch {
-		case e.ID == "<C-c>":
-			return "", true
-		case e.ID == "<Enter>":
-			return builder.String(), false
-		case strings.HasPrefix(e.ID, "<C-"):
-			continue
-		default:
-			builder.WriteString(e.ID)
-		}
-	}
-	return builder.String(), false
 }
 
 func handleListSelect(statusLabel *widgets.Paragraph, optionsList *widgets.List) bool {

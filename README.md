@@ -24,6 +24,7 @@ that can be used to skip a few steps:
 * `-profile` - The profile name to use
 * `-local-port` - Which local port to bind to, default is 8888
 * `-region` - Which AWS region to use
+* `-os-user` - SSH Bastion Username
 
 ## How it works
 Tunneller uses the `ec2-instance-connect` part of the AWS SDK
@@ -47,7 +48,7 @@ ssh -L -L 8888:$(DB_HOST):$(DB_PORT) ec2-user@$(BASTION_USER)
 * ~~Add flags to skip steps~~
 * Unit testing
 * Code cleanup
-* Make bastion username configurable
+* ~~Make bastion username configurable~~
 * CI pipeline to compile and package binary
 
 ## Acknowledgements
