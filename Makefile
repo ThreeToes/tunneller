@@ -17,16 +17,13 @@ build: bin
 	zip $(OUTPUT_PATH)/tunneller-macos $(OUTPUT_PATH)/macos/$(BINARY_NAME)
 
 windows:
-	$(EXPORT) GOOS=windows
-	go build -mod=vendor -o $(OUTPUT_PATH)/windows/$(BINARY_NAME).exe ./cmd/...
+	$(EXPORT) GOOS=windows&& go build -mod=vendor -o $(OUTPUT_PATH)/windows/$(BINARY_NAME).exe ./cmd/...
 
 linux:
-	$(EXPORT) GOOS=linux
-	go build -mod=vendor -o $(OUTPUT_PATH)/linux/$(BINARY_NAME) ./cmd/...
+	$(EXPORT) GOOS=linux&& go build -mod=vendor -o $(OUTPUT_PATH)/linux/$(BINARY_NAME) ./cmd/...
 
 macos:
-	$(EXPORT) GOOS=darwin
-	go build -mod=vendor -o $(OUTPUT_PATH)/macos/$(BINARY_NAME) ./cmd/...
+	$(EXPORT) GOOS=darwin&& go build -mod=vendor -o $(OUTPUT_PATH)/macos/$(BINARY_NAME) ./cmd/...
 
 bin: test windows linux macos
 
