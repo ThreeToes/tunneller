@@ -1,0 +1,10 @@
+language: go
+go:
+  - "1.14.x"
+before_install:
+  - sudo apt-get -y install make
+env:
+  - CGO_ENABLED=0
+branches:
+  only:
+    - master
