@@ -49,7 +49,7 @@ ssh -L -L 8888:$(DB_HOST):$(DB_PORT) ec2-user@$(BASTION_USER)
 * Unit testing
 * Code cleanup
 * ~~Make bastion username configurable~~
-* CI pipeline to compile and package binary
+* ~~CI pipeline to compile and package binary~~
 
 ## Acknowledgements
 Most of the connection code is lifted wholesale
