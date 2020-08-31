@@ -1,0 +1,22 @@
+language: go
+go:
+  - "1.14.x"
+before_install:
+  - sudo apt-get -y install make zip
+env:
+  - CGO_ENABLED=0
+branches:
+  only:
+    - master
+before_deploy:
+  - git config --local user.name "threetoes"
+  - git config --local user.email "stephen.gream@gmail.com"
+  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - git tag $TRAVIS_TAG
+deploy:
+  provider: releases
+  api_key:
+    secure: "eHGT1fLxTT8qNBlqRl8IBY47+ZjYZBXsnpg4f1+llPUfR6LROuh9cs/rknUNZ6U6BovPlyhCmNGgscG02teIgZADPJQ1MBDB71WtorGMwM9kO7XYhGncGAdq77RCp4A9L6/gqKbyHBPgvFP1UHWFBbH0jIJaSqtC+bro5NhLiQMXFd2/xQrOeV1shVGPsJWvVV1vITCJLKVShS3XmgqqE0smPHf4jaOTnkXzIT0phckYpB/g17bU8hPxfhnlRRKZzILHjuWnEF+vtkMSQlQpo+qZhlNicB6JavxKWrfA1d2jf8eb+mMGnspSJHifs2DetzvfOOSrQS+ucNvVSJXhYMSLQ1iiEdgdt+3x65i7SyJu1az0zKtWB8B2lABc7hZhIQsZBEk9e6ROyYVdFJ0QWBGKc410GqpT4XdONVCAE2gg/k/BCZVj9LjOBaad+QgfEQeKYiE9Di3vUXZ0k15HXO0uwunTBWviGAzjnUmQ0eba8Vi2meaqhEXxAmc80aTY4uzaoOO3nhZdksNknqWRihKNR2toPbzQIezcZFOI0oSgV+n38qQpIaKTmFLZT46GmQQyGz1KbKj8A3PXYHkIlpadD66D18FD03W48Ya46BxwHyvYQUX7tLNDlcWUQqojsCATPWC+hC7RafsL0J+LsqzVUnQL5SQdEpR1tFfuo5U="
+  file_glob: true
+  file: build/*.zip
+  skip_cleanup: true
