@@ -25,6 +25,7 @@ func main() {
 	localPortF := flag.Int("local-port", -1, "Port to use")
 	regionF := flag.String("region", "", "AWS Region")
 	helpF := flag.Bool("help", false, "Display help and exit")
+	usernameF := flag.String("username", "ec2-user", "EC2 instance username")
 
 	flag.Parse()
 
@@ -237,7 +238,8 @@ func main() {
 	statusLabel.Text = "Connected to bastion, starting tunnel"
 	ui.Clear()
 	ui.Render(statusLabel)
-	dbEndpoint := internal.NewEndpoint(fmt.Sprintf("ec2-user@%s:%d",
+	dbEndpoint := internal.NewEndpoint(fmt.Sprintf("%s@%s:%d",
+		*usernameF,
 		*selectedDb.Endpoint.Address, *selectedDb.Endpoint.Port))
 	done, err := internal.Tunnel(port, dbEndpoint, ec2Endpoint)
 	if err != nil {
@@ -306,10 +308,10 @@ func handleListSelect(statusLabel *widgets.Paragraph, optionsList *widgets.List)
 	optionsList.SelectedRow = 0
 	uiEvents := ui.PollEvents()
 	for {
-		ui.Render(statusLabel, optionsList)
 		termWidth, termHeight := ui.TerminalDimensions()
 		statusLabel.SetRect(0, 0, termWidth, 1)
 		optionsList.SetRect(0, 1, termWidth, termHeight)
+		ui.Render(statusLabel, optionsList)
 		e := <-uiEvents
 		switch e.ID {
 		case "<C-c>":
