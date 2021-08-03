@@ -19,7 +19,7 @@ build: bin
 windows:
 	$(EXPORT) GOOS=windows&& go build -mod=vendor -o $(OUTPUT_PATH)/windows/$(BINARY_NAME).exe ./cmd/...
 
-linux:4
+linux:
 	$(EXPORT) GOOS=linux&& go build -mod=vendor -o $(OUTPUT_PATH)/linux/$(BINARY_NAME) ./cmd/...
 
 macos:
