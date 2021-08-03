@@ -21,11 +21,17 @@ import (
 )
 
 func main() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Println("Cannot find home directory")
+		home = ""
+	}
 	profileF := flag.String("profile", "", "Name of the profile to use")
 	localPortF := flag.Int("local-port", -1, "Port to use")
 	regionF := flag.String("region", "", "AWS Region")
 	helpF := flag.Bool("help", false, "Display help and exit")
 	ec2UserF := flag.String("os-user", "ec2-user", "OS username for the bastion")
+	awsCredentialsF := flag.String("credentials", path.Join(home, ".aws/credentials"), "Path to AWS credentials file")
 
 	flag.Parse()
 
@@ -34,15 +40,9 @@ func main() {
 		return
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		fmt.Println("Cannot find AWS credentials file")
-		os.Exit(1)
-	}
-	joined := path.Join(home, ".aws/credentials")
-	fmt.Printf("Reading config from %s\n", joined)
+	log.Printf("Reading config from %s\n", *awsCredentialsF)
 
-	prof := internal.NewIniConfig(joined)
+	prof := internal.NewIniConfig(*awsCredentialsF)
 	if err = prof.Refresh(); err != nil {
 		log.Fatalf("Could not load profiles: %v", err)
 	}
@@ -148,6 +148,12 @@ func main() {
 			DryRun:     aws.Bool(false),
 			MaxResults: aws.Int64(20),
 			NextToken:  nt,
+			Filters: []*ec2.Filter{
+				{
+					Name: aws.String("instance-state-name"),
+					Values: []*string{aws.String("running")},
+				},
+			},
 		})
 
 		if err != nil {
@@ -184,7 +190,8 @@ func main() {
 		return
 	}
 	selectedBastion := instances[optionsList.SelectedRow]
-	statusLabel.Text = fmt.Sprintf("Selected %s as the bastion. Getting RDS servers", *selectedBastion.InstanceId)
+	statusLabel.Text = fmt.Sprintf("Selected %s as the bastion. Getting RDS servers",
+		*selectedBastion.InstanceId)
 	ui.Clear()
 	ui.Render(statusLabel)
 	dbSvc, err := selectedProfile.GetRDSService()
@@ -246,8 +253,8 @@ func main() {
 	}
 	statusLabel.Text = fmt.Sprintf("Tunnel started. Connect on localhost port %d with your DB client using regular credentials. Press Ctrl-C to end", port)
 	termWidth, termHeight := ui.TerminalDimensions()
-	statusLabel.SetRect(((termWidth / 2) - 10), ((termHeight / 2) - 5),
-		((termWidth / 2) + 10), ((termHeight / 2) + 5))
+	statusLabel.SetRect((termWidth / 2) - 10, (termHeight / 2) - 5,
+		(termWidth / 2) + 10, (termHeight / 2) + 5)
 	ui.Clear()
 	ui.Render(statusLabel)
 	evt := ui.PollEvents()
@@ -264,8 +271,8 @@ func main() {
 			}
 			ui.Clear()
 			termWidth, termHeight = ui.TerminalDimensions()
-			statusLabel.SetRect(((termWidth / 2) - 15), ((termHeight / 2) - 15),
-				((termWidth / 2) + 15), ((termHeight / 2) + 15))
+			statusLabel.SetRect((termWidth / 2) - 10, (termHeight / 2) - 5,
+				(termWidth / 2) + 10, (termHeight / 2) + 5)
 			ui.Render(statusLabel)
 		case <-done:
 			log.Println("Tunnel server reports it's had an error. Exiting")
