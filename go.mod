@@ -3,7 +3,7 @@ module github.com/threetoes/tunneller
 go 1.13
 
 require (
-	github.com/aws/aws-sdk-go v1.30.21
+	github.com/aws/aws-sdk-go v1.34.0
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.6.0
